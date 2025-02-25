@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #f5f5dc);
+      color: #2c3e50;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      transition: background 0.5s;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      background: linear-gradient(to bottom, #e3d5b5, #2c3e50);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      color: #f5f5dc;
+    }
+    .timer {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+    .controls button, .task-list button {
+      background: #e3d5b5;
+      color: #2c3e50;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .controls button:hover, .task-list button:hover {
+      background: #2c3e50;
+      color: #f5f5dc;
+    }
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .task-list {
+      margin-top: 20px;
+    }
+    .task-list input {
+      padding: 5px;
+      width: 70%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pomodoro Timer</h1>
+    <div class="timer">
+      <span id="minutes">25</span>:<span id="seconds">00</span>
+    </div>
+    <p class="message" id="sessionMessage"></p>
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="task-list">
+      <input type="text" id="taskInput" placeholder="Add a task">
+      <button onclick="addTask()">Add</button>
+      <ul id="tasks"></ul>
+    </div>
+  </div>
+  <script>
+    let timer;
+    let timeLeft = 1500; // 25 minutes en secondes
+    let sessionCount = 0;
+    let running = false;
+    let isWorkSession = true;
+    const minutesDisplay = document.getElementById("minutes");
+    const secondsDisplay = document.getElementById("seconds");
+    const sessionMessage = document.getElementById("sessionMessage");
+    const startButton = document.getElementById("start");
+    const pauseButton = document.getElementById("pause");
+    const resetButton = document.getElementById("reset");
+
+    function updateDisplay() {
+      let minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+      minutesDisplay.textContent = minutes.toString().padStart(2, '0');
+      secondsDisplay.textContent = seconds.toString().padStart(2, '0');
+    }
+
+    function startTimer() {
+      if (!running) {
+        running = true;
+        timer = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+          } else {
+            clearInterval(timer);
+            running = false;
+            sessionCount++;
+            // Demande de confirmation avant de passer à la session suivante
+            if (window.confirm("Êtes-vous prêt à commencer la prochaine session ?")) {
+              switchSession();
+              startTimer();
+            } else {
+              switchSession();
+              // L'utilisateur devra démarrer manuellement en cliquant sur "Start"
+            }
+          }
+        }, 1000);
+      }
+    }
+
+    function pauseTimer() {
+      clearInterval(timer);
+      running = false;
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      running = false;
+      sessionCount = 0;
+      isWorkSession = true;
+      timeLeft = 1500; // Réinitialisation à 25 minutes
+      sessionMessage.textContent = "";
+      updateDisplay();
+    }
+
+    function switchSession() {
+      if (isWorkSession) {
+        sessionMessage.textContent = "Break time! Enjoy your pause.";
+        // Pause courte : 5 minutes sauf tous les 4 cycles où la pause est longue (15 min)
+        if (sessionCount % 4 === 0) {
+          timeLeft = 900; // Pause longue (15 min)
+        } else {
+          timeLeft = 300; // Pause courte (5 min)
+        }
+      } else {
+        sessionMessage.textContent = "Back to work! Let's go.";
+        timeLeft = 1500; // Session de travail (25 min)
+      }
+      isWorkSession = !isWorkSession;
+      updateDisplay();
+    }
+
+    function addTask() {
+      let taskInput = document.getElementById("taskInput");
+      let taskText = taskInput.value.trim();
+      if (taskText !== "") {
+        let taskList = document.getElementById("tasks");
+        let li = document.createElement("li");
+        li.textContent = taskText;
+        taskList.appendChild(li);
+        taskInput.value = "";
+      }
+    }
+
+    startButton.addEventListener("click", startTimer);
+    pauseButton.addEventListener("click", pauseTimer);
+    resetButton.addEventListener("click", resetTimer);
+  </script>
+</body>
+</html>
+ml>
