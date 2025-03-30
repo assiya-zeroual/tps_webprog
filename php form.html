@@ -1,0 +1,84 @@
+<?php
+// Vérifier si le formulaire a été soumis
+$firstName = isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName']) : '';
+$lastName = isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName']) : '';
+$email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
+$phone = isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : '';
+$gender = isset($_POST['gender']) ? htmlspecialchars($_POST['gender']) : '';
+$dob = isset($_POST['dob']) ? htmlspecialchars($_POST['dob']) : '';
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Portfolio & Formulaire d'Inscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; text-align: center; background: linear-gradient(135deg, #001f3f, #002f5f); color: #f5f5dc; }
+    nav { background: linear-gradient(90deg, #001f3f, #002f5f); padding: 15px; position: fixed; width: 100%; top: 0; left: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.8em; font-weight: 700; }
+    nav ul { list-style: none; display: flex; }
+    nav ul li { margin: 0 15px; }
+    nav ul li a { text-decoration: none; color: #f5f5dc; font-size: 1.1em; transition: color 0.3s; }
+    nav ul li a:hover { color: #d2b48c; }
+    .signup-btn { background: #f5f5dc; color: #001f3f; padding: 8px 16px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+    .signup-btn:hover { background: #d2b48c; }
+    .section { padding: 100px 20px; max-width: 900px; margin: auto; }
+    .section-title { font-size: 2.5em; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f5f5dc; display: inline-block; padding-bottom: 5px; }
+    #form-section { padding: 120px 20px; }
+    form { background: white; padding: 20px; max-width: 400px; margin: auto; border-radius: 10px; box-shadow: 0px 0px 10px gray; color: black; }
+    label { display: block; margin-top: 10px; text-align: left; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    input[type="submit"] { background-color: blue; color: white; border: none; cursor: pointer; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Zeroual Assiya</div>
+    <ul>
+      <li><a href="#about">À propos</a></li>
+      <li><a href="#projects">Projets</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="signup-btn" onclick="window.location.href='#form-section'">S'inscrire</button>
+  </nav>
+  <section id="about" class="section">
+    <h2 class="section-title">À propos de moi</h2>
+    <p>Je suis Zeroual Assiya, étudiante en ingénierie logicielle et data.</p>
+  </section>
+  <section id="projects" class="section">
+    <h2 class="section-title">Projets</h2>
+    <p>Voici quelques-uns de mes projets récents...</p>
+  </section>
+  <section id="contact" class="section">
+    <h2 class="section-title">Me contacter</h2>
+    <p>Email: <a href="mailto:lascience.doc22@gmail.com">lascience.doc22@gmail.com</a></p>
+  </section>
+  <section id="form-section">
+    <h2>Formulaire d'inscription</h2>
+    <form method="post" action="">
+      <label for="firstName">Prénom :</label>
+      <input type="text" id="firstName" name="firstName" value=" votre nom " required>
+      <label for="lastName">Nom :</label>
+      <input type="text" id="lastName" name="lastName" value=" votre prenom " required>
+      <label for="email">Email :</label>
+      <input type="email" id="email" name="email" value=" example@gmail.com " required>
+      <label for="phone">Téléphone :</label>
+      <input type="tel" id="phone" name="phone" value=" xxxxxxxxxx" required>
+      <label for="gender">Genre :</label>
+      <select id="gender" name="gender" required>
+        <option value="" <?= ($gender == '') ? 'selected' : ''; ?> Sélectionnez</option>
+        <option value="male" <?= ($gender == 'male') ? 'selected' : ''; ?> Homme</option>
+        <option value="female" <?= ($gender == 'female') ? 'selected' : ''; ?> Femme</option>
+      </select>
+      <label for="dob">Date de naissance :</label>
+      <input type="date" id="dob" name="dob" value="<?= htmlspecialchars($dob); ?>" required>
+      <input type="submit" value="S'inscrire">
+    </form>
+  </section>
+  <footer>
+    Merci pour votre visite !
+  </footer>
+</body>
+</html>
