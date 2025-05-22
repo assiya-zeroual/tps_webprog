@@ -1,0 +1,250 @@
+<?php
+// ==================== CONFIGURATION DE LA BASE DE DONNÉES ====================
+$host = 'localhost';
+$dbname = 'form_db';
+$username = 'root';
+$password = 'Assiya2004';
+
+// Initialisation des variables
+$success = '';
+$error = '';
+
+// Connexion à la base de données
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Création de la table si elle n'existe pas (pour faciliter le test)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS contacts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nom VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        telephone VARCHAR(20),
+        message TEXT NOT NULL,
+        date_creation DATETIME NOT NULL
+    )");
+} catch (PDOException $e) {
+    $error = "Erreur de connexion à la base de données: " . $e->getMessage();
+}
+
+// ==================== TRAITEMENT DU FORMULAIRE ====================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Nettoyage des données
+    $nom = htmlspecialchars($_POST['nom'] ?? '');
+    $email = htmlspecialchars($_POST['email'] ?? '');
+    $telephone = htmlspecialchars($_POST['telephone'] ?? '');
+    $message = htmlspecialchars($_POST['message'] ?? '');
+
+    // Validation simple
+    if (empty($nom) || empty($email) || empty($message)) {
+        $error = "Veuillez remplir tous les champs obligatoires.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "L'adresse email n'est pas valide.";
+    } else {
+        try {
+            // Insertion dans la base de données
+            $stmt = $pdo->prepare("INSERT INTO contacts (nom, email, telephone, message, date_creation)
+                                  VALUES (:nom, :email, :telephone, :message, NOW())");
+            $stmt->execute([
+                ':nom' => $nom,
+                ':email' => $email,
+                ':telephone' => $telephone,
+                ':message' => $message
+            ]);
+
+            $success = "Votre message a bien été envoyé!";
+
+            // Réinitialisation des valeurs du formulaire après succès
+            $nom = $email = $telephone = $message = '';
+        } catch (PDOException $e) {
+            $error = "Erreur lors de l'enregistrement: " . $e->getMessage();
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Contact Professionnel</title>
+    <style>
+        /* ==================== STYLES CSS ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .form-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: #555;
+        }
+
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h1>Formulaire de Contact</h1>
+
+            <?php if (!empty($success)): ?>
+                <div class="alert alert-success"><?= $success ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-error"><?= $error ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="nom" class="required">Nom complet</label>
+                    <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($nom ?? '') ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="required">Email</label>
+                    <input type="email" id="email" name="email" value="<?= htmlspecialchars($email ?? '') ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone">Téléphone</label>
+                    <input type="tel" id="telephone" name="telephone" value="<?= htmlspecialchars($telephone ?? '') ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="sujet">Sujet</label>
+                    <select id="sujet" name="sujet">
+                        <option value="">-- Sélectionnez un sujet --</option>
+                        <option value="question">Question</option>
+                        <option value="reclamation">Réclamation</option>
+                        <option value="suggestion">Suggestion</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message" class="required">Message</label>
+                    <textarea id="message" name="message" rows="5" required><?= htmlspecialchars($message ?? '') ?></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Envoyer le message</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
